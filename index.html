@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Monitoring Jaringan</title>
+    <link rel="icon" type="image/png" href="C:\Users\HYPE AMD\OneDrive\Documents\web\dashboard-jaringan\Komputer.png" />
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { sidebar: '#0f172a', accent: '#38bdf8' } } }
+        };
+    </script>
+
+    <!-- FontAwesome (ikon) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Chart.js (grafik) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body class="bg-slate-100 text-slate-700 font-sans">
+<div class="flex min-h-screen">
+
+    <!-- ========================= SIDEBAR ========================= -->
+    <aside id="sidebar"
+           class="fixed inset-y-0 left-0 z-40 w-64 bg-sidebar text-white flex flex-col
+                  transform -translate-x-full lg:translate-x-0 transition-transform duration-200">
+        <div class="px-6 py-5 border-b border-slate-800 flex items-center gap-3">
+            <i class="fa-solid fa-network-wired text-accent text-xl"></i>
+            <h2 class="text-xl font-bold tracking-wide">AdminPanel</h2>
+        </div>
+
+        <nav class="flex-1 px-3 py-4 space-y-1">
+            <a href="#dashboard" data-nav="dashboard" onclick="event.preventDefault(); tampilkanView('dashboard')"
+               class="menu-link flex items-center gap-3 px-4 py-2.5 rounded-lg bg-slate-800 text-accent border-l-4 border-accent font-medium">
+                <i class="fa-solid fa-gauge w-5"></i> Dashboard
+            </a>
+            <a href="#server" data-nav="server" onclick="event.preventDefault(); tampilkanView('server')"
+               class="menu-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-server w-5"></i> Status Server
+            </a>
+            <a href="#trafik" data-nav="trafik" onclick="event.preventDefault(); tampilkanView('trafik')"
+               class="menu-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-chart-line w-5"></i> Lalu Lintas Data
+            </a>
+            <a href="#pengaturan" data-nav="pengaturan" onclick="event.preventDefault(); tampilkanView('pengaturan')"
+               class="menu-link flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </a>
+        </nav>
+
+        <div class="px-6 py-4 border-t border-slate-800 text-xs text-slate-500">
+            <div id="namaJaringanSidebar" class="text-slate-400 font-medium mb-1">Jaringan Laboratorium</div>
+            &copy; 2026 Latihan Jaringan
+        </div>
+    </aside>
+
+    <!-- ========================= KONTEN UTAMA ========================= -->
+    <div class="flex-1 lg:ml-64 min-w-0">
+
+        <!-- TOPBAR -->
+        <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h1 id="judul" class="text-xl font-bold text-slate-800">Ringkasan Sistem</h1>
+                </div>
+
+                <div class="flex items-center gap-5">
+                    <span id="liveBadge" class="hidden sm:flex items-center gap-2 text-sm font-medium text-green-600">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                        </span>
+                        Live
+                    </span>
+                    <span id="jam" class="hidden md:block text-sm text-slate-500 font-mono"></span>
+
+                    <div class="flex items-center gap-3 bg-slate-200 rounded-full pl-1.5 pr-4 py-1.5">
+                        <div class="w-8 h-8 rounded-full bg-sidebar text-accent flex items-center justify-center">
+                            <i class="fa-solid fa-user-shield text-sm"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-700">Admin</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-6 space-y-6">
+
+            <!-- =====================================================
+                 HALAMAN 1: DASHBOARD
+                 ===================================================== -->
+            <div id="view-dashboard" class="view space-y-6">
+
+                <!-- Kartu statistik -->
+                <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-slate-500">Status Router</h3>
+                            <div class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                                <i class="fa-solid fa-wifi"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-green-600">Online</p>
+                        <p class="text-xs text-slate-400 mt-1">Perangkat pusat jaringan</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-slate-500">Rata-rata CPU</h3>
+                            <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                        </div>
+                        <p id="avgCpu" class="text-2xl font-bold text-slate-800">--%</p>
+                        <div class="w-full h-2 bg-slate-200 rounded-full mt-3 overflow-hidden">
+                            <div id="cpuBar" class="h-2 bg-sky-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-slate-500">Total Pengguna</h3>
+                            <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                        </div>
+                        <p id="activeUsers" class="text-2xl font-bold text-slate-800">--</p>
+                        <p class="text-xs text-slate-400 mt-1">Pengguna aktif saat ini</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-slate-500">Perangkat Putus</h3>
+                            <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                        </div>
+                        <p id="downCount" class="text-2xl font-bold text-red-600">--</p>
+                        <p class="text-xs text-slate-400 mt-1">Perlu pemeriksaan segera</p>
+                    </div>
+                </section>
+
+                <!-- Grafik -->
+                <section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                    <div class="xl:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-slate-800">
+                                <i class="fa-solid fa-chart-area text-sky-500 mr-2"></i>Beban CPU Real-time
+                            </h2>
+                            <span class="text-xs text-slate-400">Diperbarui sesuai interval di Pengaturan</span>
+                        </div>
+                        <div class="h-72"><canvas id="cpuChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h2 class="font-semibold text-slate-800 mb-4">
+                            <i class="fa-solid fa-chart-pie text-sky-500 mr-2"></i>Status Perangkat
+                        </h2>
+                        <div class="h-72"><canvas id="statusChart"></canvas></div>
+                    </div>
+                </section>
+
+                <!-- Tabel perangkat -->
+                <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200">
+                        <h2 class="font-semibold text-slate-800">
+                            <i class="fa-solid fa-table-list text-sky-500 mr-2"></i>Aktivitas Perangkat Terbaru
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">IP Address</th>
+                                    <th class="px-6 py-3 font-semibold">Nama Perangkat</th>
+                                    <th class="px-6 py-3 font-semibold">Status</th>
+                                    <th class="px-6 py-3 font-semibold">Beban CPU</th>
+                                    <th class="px-6 py-3 font-semibold">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deviceTable" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =====================================================
+                 HALAMAN 2: STATUS SERVER
+                 ===================================================== -->
+            <div id="view-server" class="view hidden space-y-6">
+
+                <!-- Ringkasan server -->
+                <section class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <p class="text-sm text-slate-500">Server Online</p>
+                        <p id="srvOnline" class="text-2xl font-bold text-green-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <p class="text-sm text-slate-500">Server Offline</p>
+                        <p id="srvOffline" class="text-2xl font-bold text-red-600 mt-1">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <p class="text-sm text-slate-500">Peringatan Aktif</p>
+                        <p id="srvPeringatan" class="text-2xl font-bold text-amber-600 mt-1">0</p>
+                    </div>
+                </section>
+
+                <!-- Kartu server -->
+                <section id="daftarServer" class="grid grid-cols-1 xl:grid-cols-2 gap-5"></section>
+
+                <!-- Log kejadian -->
+                <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                        <h2 class="font-semibold text-slate-800">
+                            <i class="fa-solid fa-clipboard-list text-sky-500 mr-2"></i>Log Kejadian
+                        </h2>
+                        <button onclick="kosongkanLog()" class="text-xs text-slate-500 hover:text-red-600">
+                            <i class="fa-solid fa-trash mr-1"></i>Kosongkan
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 sticky top-0">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">Waktu</th>
+                                    <th class="px-6 py-3 font-semibold">Level</th>
+                                    <th class="px-6 py-3 font-semibold">Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTable" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =====================================================
+                 HALAMAN 3: LALU LINTAS DATA
+                 ===================================================== -->
+            <div id="view-trafik" class="view hidden space-y-6">
+
+                <!-- Ringkasan total -->
+                <section class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <p class="text-sm text-slate-500">Total Unduh</p>
+                        <p id="trafikDown" class="text-2xl font-bold text-sky-600 mt-1">-- Mbps</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <p class="text-sm text-slate-500">Total Unggah</p>
+                        <p id="trafikUp" class="text-2xl font-bold text-indigo-600 mt-1">-- Mbps</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <p class="text-sm text-slate-500">Kapasitas Uplink ISP</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">100 Mbps</p>
+                    </div>
+                </section>
+
+                <!-- Grafik lalu lintas + protokol -->
+                <section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                    <div class="xl:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-semibold text-slate-800">
+                                <i class="fa-solid fa-arrow-right-arrow-left text-sky-500 mr-2"></i>Grafik Unduh & Unggah (Mbps)
+                            </h2>
+                        </div>
+                        <div class="h-72"><canvas id="trafikChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                        <h2 class="font-semibold text-slate-800 mb-4">
+                            <i class="fa-solid fa-layer-group text-sky-500 mr-2"></i>Proporsi Protokol
+                        </h2>
+                        <div class="h-72"><canvas id="protokolChart"></canvas></div>
+                    </div>
+                </section>
+
+                <!-- Kondisi interface -->
+                <section>
+                    <h2 class="font-semibold text-slate-800 mb-3">
+                        <i class="fa-solid fa-ethernet text-sky-500 mr-2"></i>Kondisi Interface Jaringan
+                    </h2>
+                    <div id="daftarInterface" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+                </section>
+
+                <!-- Pengguna bandwidth tertinggi -->
+                <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200">
+                        <h2 class="font-semibold text-slate-800">
+                            <i class="fa-solid fa-ranking-star text-sky-500 mr-2"></i>Perangkat dengan Pemakaian Tertinggi
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold">#</th>
+                                    <th class="px-6 py-3 font-semibold">Nama Perangkat</th>
+                                    <th class="px-6 py-3 font-semibold">IP Address</th>
+                                    <th class="px-6 py-3 font-semibold">Unduh</th>
+                                    <th class="px-6 py-3 font-semibold">Unggah</th>
+                                    <th class="px-6 py-3 font-semibold">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topTable" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =====================================================
+                 HALAMAN 4: PENGATURAN
+                 ===================================================== -->
+            <div id="view-pengaturan" class="view hidden space-y-6">
+
+                <form id="formPengaturan" onsubmit="simpanPengaturan(event)" class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+                    <!-- Pengaturan umum -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+                        <h2 class="font-semibold text-slate-800 text-lg">
+                            <i class="fa-solid fa-sliders text-sky-500 mr-2"></i>Pengaturan Umum
+                        </h2>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nama Jaringan</label>
+                            <input id="set_nama" type="text" required
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 mb-1">IP Gateway</label>
+                                <input id="set_gateway" type="text" required pattern="^(\d{1,3}\.){3}\d{1,3}$"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-sky-400">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 mb-1">DNS Server</label>
+                                <input id="set_dns" type="text" required pattern="^(\d{1,3}\.){3}\d{1,3}$"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-sky-400">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Interval Pembaruan Data</label>
+                            <select id="set_interval"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                                <option value="1">1 detik</option>
+                                <option value="3">3 detik</option>
+                                <option value="5">5 detik</option>
+                                <option value="10">10 detik</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <div>
+                                <p class="text-sm font-medium text-slate-600">Catat peringatan ke log</p>
+                                <p class="text-xs text-slate-400">Mencatat saat CPU atau RAM melewati ambang</p>
+                            </div>
+                            <input id="set_peringatan" type="checkbox" class="w-5 h-5 accent-sky-600">
+                        </div>
+                    </div>
+
+                    <!-- Ambang peringatan -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
+                        <h2 class="font-semibold text-slate-800 text-lg">
+                            <i class="fa-solid fa-bell text-amber-500 mr-2"></i>Ambang Peringatan
+                        </h2>
+
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-slate-600 mb-2">
+                                <span>Ambang CPU</span>
+                                <span id="lbl_ambangCpu" class="font-mono text-sky-600">80%</span>
+                            </div>
+                            <input id="set_ambangCpu" type="range" min="50" max="100" step="5"
+                                   oninput="document.getElementById('lbl_ambangCpu').textContent = this.value + '%'"
+                                   class="w-full accent-sky-600">
+                            <p class="text-xs text-slate-400 mt-1">Beban CPU di atas nilai ini akan dianggap waspada.</p>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-sm font-medium text-slate-600 mb-2">
+                                <span>Ambang RAM</span>
+                                <span id="lbl_ambangRam" class="font-mono text-sky-600">85%</span>
+                            </div>
+                            <input id="set_ambangRam" type="range" min="50" max="100" step="5"
+                                   oninput="document.getElementById('lbl_ambangRam').textContent = this.value + '%'"
+                                   class="w-full accent-sky-600">
+                            <p class="text-xs text-slate-400 mt-1">Pemakaian RAM di atas nilai ini akan dianggap waspada.</p>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-2">
+                            <button type="submit"
+                                    class="px-5 py-2.5 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i>Simpan Pengaturan
+                            </button>
+                            <button type="button" onclick="resetPengaturan()"
+                                    class="px-5 py-2.5 rounded-lg bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition">
+                                Reset Default
+                            </button>
+                            <span id="pesanSimpan" class="text-sm text-green-600 hidden">
+                                <i class="fa-solid fa-circle-check mr-1"></i>Tersimpan
+                            </span>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Kelola perangkat -->
+                <section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <h2 class="font-semibold text-slate-800 text-lg mb-4">
+                            <i class="fa-solid fa-plus text-sky-500 mr-2"></i>Tambah Perangkat
+                        </h2>
+                        <form onsubmit="tambahPerangkat(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 mb-1">IP Address</label>
+                                <input id="add_ip" type="text" required placeholder="192.168.1.50"
+                                       pattern="^(\d{1,3}\.){3}\d{1,3}$"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-sky-400">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 mb-1">Nama Perangkat</label>
+                                <input id="add_nama" type="text" required placeholder="PC-Kelas-02"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 mb-1">Status Awal</label>
+                                <select id="add_status"
+                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                                    <option value="Terhubung">Terhubung</option>
+                                    <option value="Putus">Putus</option>
+                                </select>
+                            </div>
+                            <button type="submit"
+                                    class="w-full px-4 py-2.5 rounded-lg bg-sky-600 text-white font-medium hover:bg-sky-700 transition">
+                                Tambahkan
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="xl:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-200">
+                            <h2 class="font-semibold text-slate-800">
+                                <i class="fa-solid fa-list text-sky-500 mr-2"></i>Daftar Perangkat Terdaftar
+                            </h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+                                    <tr>
+                                        <th class="px-6 py-3 font-semibold">Nama</th>
+                                        <th class="px-6 py-3 font-semibold">IP Address</th>
+                                        <th class="px-6 py-3 font-semibold">Status</th>
+                                        <th class="px-6 py-3 font-semibold">Hapus</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listPerangkatPengaturan" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- ========================= MODAL DETAIL PERANGKAT ========================= -->
+<div id="modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="bg-sidebar text-white px-5 py-4 flex items-center justify-between">
+            <h3 class="font-semibold">Detail Perangkat</h3>
+            <button onclick="tutupModal()" class="text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="modalBody" class="p-5 space-y-3 text-sm"></div>
+        <div class="px-5 py-3 bg-slate-50 text-right">
+            <button onclick="tutupModal()" class="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================================
+// 1. UTILITAS UMUM
+// ==========================================================
+const KUNCI_PENGATURAN = 'dashboard-jaringan-pengaturan';
+
+const PENGATURAN_DEFAULT = {
+    namaJaringan: 'Jaringan Laboratorium',
+    ipGateway: '192.168.1.1',
+    dns: '8.8.8.8',
+    intervalDetik: 3,
+    ambangCpu: 80,
+    ambangRam: 85,
+    peringatanAktif: true
+};
+
+let pengaturan = { ...PENGATURAN_DEFAULT };
+let viewAktif = 'dashboard';
+let timerUpdate = null;
+const MAX_TITIK = 20;
+const MAX_LOG = 50;
+
+// Mencegah teks disisipkan sebagai HTML
+function esc(teks) {
+    const div = document.createElement('div');
+    div.textContent = String(teks);
+    return div.innerHTML;
+}
+
+function rnd(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function waktuSekarang() {
+    return new Date().toLocaleTimeString('id-ID');
+}
+
+function formatUptime(detik) {
+    const hari = Math.floor(detik / 86400);
+    const jam = Math.floor((detik % 86400) / 3600);
+    const menit = Math.floor((detik % 3600) / 60);
+    return `${hari} hari ${jam} jam ${menit} menit`;
+}
+
+// Warna bar: merah di atas 80%, kuning di atas 50%, biru selainnya
+function warnaBar(nilai) {
+    return nilai > 80 ? 'bg-red-500' : nilai > 50 ? 'bg-amber-500' : 'bg-sky-500';
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('-translate-x-full');
+}
+
+function perbaruiJam() {
+    document.getElementById('jam').textContent = waktuSekarang();
+}
+
+// ==========================================================
+// 2. DATA (disimpan di memori browser)
+// ==========================================================
+// Data perangkat: IP, nama, status, CPU, dan pemakaian bandwidth (Mbps)
+let perangkat = [
+    { id: 1, ip: '192.168.1.5',  nama: 'Access-Point-Lab',   status: 'Terhubung', cpu: 12, unduh: 4.2,  unggah: 1.1, waspada: false },
+    { id: 2, ip: '192.168.1.10', nama: 'PC-Laboratorium-01', status: 'Terhubung', cpu: 24, unduh: 12.8, unggah: 2.4, waspada: false },
+    { id: 3, ip: '192.168.1.15', nama: 'Server-Lokal',       status: 'Terhubung', cpu: 45, unduh: 28.5, unggah: 18.9, waspada: false },
+    { id: 4, ip: '192.168.1.22', nama: 'Printer-Jaringan',   status: 'Putus',     cpu: 0,  unduh: 0,    unggah: 0,   waspada: false }
+];
+let idPerangkatBerikutnya = 5;
+
+// Data server
+let servers = [
+    {
+        id: 1, nama: 'Server-Lokal', ip: '192.168.1.15', os: 'Ubuntu Server 22.04',
+        status: 'Online', uptimeDetik: 15 * 86400 + 4 * 3600 + 12 * 60,
+        cpu: 45, ram: 62, disk: 48, waspada: false,
+        layanan: [
+            { nama: 'HTTP (Apache)', port: 80,   aktif: true  },
+            { nama: 'MySQL',         port: 3306, aktif: true  },
+            { nama: 'DHCP',          port: 67,   aktif: true  },
+            { nama: 'FTP',           port: 21,   aktif: false }
+        ]
+    },
+    {
+        id: 2, nama: 'Server-Web', ip: '192.168.1.20', os: 'Debian 12',
+        status: 'Online', uptimeDetik: 32 * 86400 + 9 * 3600,
+        cpu: 28, ram: 41, disk: 72, waspada: false,
+        layanan: [
+            { nama: 'HTTP (Nginx)', port: 80,  aktif: true },
+            { nama: 'HTTPS',        port: 443, aktif: true },
+            { nama: 'SSH',          port: 22,  aktif: true }
+        ]
+    },
+    {
+        id: 3, nama: 'Server-Backup', ip: '192.168.1.30', os: 'Windows Server 2019',
+        status: 'Offline', uptimeDetik: 0,
+        cpu: 0, ram: 0, disk: 85, waspada: false,
+        layanan: [
+            { nama: 'SMB (File Sharing)', port: 445,  aktif: false },
+            { nama: 'RDP',                port: 3389, aktif: false }
+        ]
+    }
+];
+
+// Log kejadian (terbaru di urutan atas)
+let logKejadian = [
+    { waktu: '10:05:33', level: 'error',   pesan: 'Server-Backup tidak merespons (offline)' },
+    { waktu: '09:40:17', level: 'warning', pesan: 'Printer-Jaringan terputus dari jaringan' },
+    { waktu: '08:12:04', level: 'info',    pesan: 'Backup harian Server-Lokal selesai' }
+];
+
+// Interface jaringan
+const interfaces = [
+    { nama: 'eth0', label: 'Uplink ISP',  tipe: 'Ethernet', unduh: 38, unggah: 12, kapasitas: 100 },
+    { nama: 'eth1', label: 'LAN Lab',     tipe: 'Ethernet', unduh: 21, unggah: 9,  kapasitas: 1000 },
+    { nama: 'wlan0', label: 'WiFi Kelas', tipe: 'Nirkabel', unduh: 15, unggah: 4,  kapasitas: 300 }
+];
+
+// Proporsi protokol (dalam persen)
+let protokol = [
+    { nama: 'HTTP/HTTPS', persen: 55 },
+    { nama: 'DNS',        persen: 5  },
+    { nama: 'FTP/SMB',    persen: 15 },
+    { nama: 'Lainnya',    persen: 25 }
+];
+
+// Riwayat data grafik
+const labelCpu = [], dataCpu = [];
+const labelTrafik = [], dataUnduh = [], dataUnggah = [];
+
+let cpuChart, statusChart, trafikChart, protokolChart;
+
+// ==========================================================
+// 3. PENGATURAN (disimpan di localStorage browser)
+// ==========================================================
+function muatPengaturan() {
+    try {
+        const tersimpan = JSON.parse(localStorage.getItem(KUNCI_PENGATURAN));
+        if (tersimpan) pengaturan = { ...PENGATURAN_DEFAULT, ...tersimpan };
+    } catch (err) {
+        console.warn('Pengaturan tidak bisa dibaca, memakai default.');
+    }
+    document.getElementById('namaJaringanSidebar').textContent = pengaturan.namaJaringan;
+}
+
+function simpanKePenyimpanan() {
+    try {
+        localStorage.setItem(KUNCI_PENGATURAN, JSON.stringify(pengaturan));
+    } catch (err) {
+        console.warn('Pengaturan tidak bisa disimpan di browser ini.');
+    }
+}
+
+function isiFormPengaturan() {
+    document.getElementById('set_nama').value = pengaturan.namaJaringan;
+    document.getElementById('set_gateway').value = pengaturan.ipGateway;
+    document.getElementById('set_dns').value = pengaturan.dns;
+    document.getElementById('set_interval').value = pengaturan.intervalDetik;
+    document.getElementById('set_ambangCpu').value = pengaturan.ambangCpu;
+    document.getElementById('set_ambangRam').value = pengaturan.ambangRam;
+    document.getElementById('set_peringatan').checked = pengaturan.peringatanAktif;
+    document.getElementById('lbl_ambangCpu').textContent = pengaturan.ambangCpu + '%';
+    document.getElementById('lbl_ambangRam').textContent = pengaturan.ambangRam + '%';
+    renderDaftarPerangkatPengaturan();
+}
+
+function simpanPengaturan(e) {
+    e.preventDefault();
+    pengaturan = {
+        namaJaringan: document.getElementById('set_nama').value.trim(),
+        ipGateway: document.getElementById('set_gateway').value.trim(),
+        dns: document.getElementById('set_dns').value.trim(),
+        intervalDetik: parseInt(document.getElementById('set_interval').value, 10),
+        ambangCpu: parseInt(document.getElementById('set_ambangCpu').value, 10),
+        ambangRam: parseInt(document.getElementById('set_ambangRam').value, 10),
+        peringatanAktif: document.getElementById('set_peringatan').checked
+    };
+
+    simpanKePenyimpanan();
+    document.getElementById('namaJaringanSidebar').textContent = pengaturan.namaJaringan;
+    jalankanTimer();   // terapkan interval baru
+
+    const pesan = document.getElementById('pesanSimpan');
+    pesan.classList.remove('hidden');
+    setTimeout(() => pesan.classList.add('hidden'), 2000);
+}
+
+function resetPengaturan() {
+    pengaturan = { ...PENGATURAN_DEFAULT };
+    simpanKePenyimpanan();
+    isiFormPengaturan();
+    document.getElementById('namaJaringanSidebar').textContent = pengaturan.namaJaringan;
+    jalankanTimer();
+}
+
+// ==========================================================
+// 4. KELOLA PERANGKAT (tambah & hapus)
+// ==========================================================
+function tambahPerangkat(e) {
+    e.preventDefault();
+    const ip = document.getElementById('add_ip').value.trim();
+    const nama = document.getElementById('add_nama').value.trim();
+    const status = document.getElementById('add_status').value;
+
+    if (perangkat.some(p => p.ip === ip)) {
+        alert('IP Address ' + ip + ' sudah terdaftar.');
+        return;
+    }
+
+    perangkat.push({
+        id: idPerangkatBerikutnya++,
+        ip, nama, status,
+        cpu: status === 'Terhubung' ? rnd(5, 40) : 0,
+        unduh: status === 'Terhubung' ? rnd(1, 15) : 0,
+        unggah: status === 'Terhubung' ? rnd(1, 5) : 0,
+        waspada: false
+    });
+
+    tambahLog('info', `Perangkat baru ditambahkan: ${nama} (${ip})`);
+    e.target.reset();
+    renderDaftarPerangkatPengaturan();
+    perbaruiDashboard();
+}
+
+function hapusPerangkat(id) {
+    const p = perangkat.find(x => x.id === id);
+    if (!p || !confirm(`Hapus perangkat ${p.nama}?`)) return;
+
+    perangkat = perangkat.filter(x => x.id !== id);
+    tambahLog('info', `Perangkat dihapus: ${p.nama} (${p.ip})`);
+    renderDaftarPerangkatPengaturan();
+    perbaruiDashboard();
+}
+
+function renderDaftarPerangkatPengaturan() {
+    const tbody = document.getElementById('listPerangkatPengaturan');
+    if (perangkat.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-6 text-center text-slate-400">Belum ada perangkat.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = perangkat.map(p => `
+        <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3 font-medium text-slate-800">${esc(p.nama)}</td>
+            <td class="px-6 py-3 font-mono">${esc(p.ip)}</td>
+            <td class="px-6 py-3">${esc(p.status)}</td>
+            <td class="px-6 py-3">
+                <button onclick="hapusPerangkat(${p.id})" class="text-red-600 hover:text-red-800">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>`).join('');
+}
+
+// ==========================================================
+// 5. LOG KEJADIAN
+// ==========================================================
+function tambahLog(level, pesan) {
+    logKejadian.unshift({ waktu: waktuSekarang(), level, pesan });
+    if (logKejadian.length > MAX_LOG) logKejadian.pop();
+}
+
+function kosongkanLog() {
+    logKejadian = [];
+    renderLog();
+}
+
+function renderLog() {
+    const tbody = document.getElementById('logTable');
+    if (logKejadian.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-6 text-center text-slate-400">Tidak ada log.</td></tr>`;
+        return;
+    }
+    const badge = {
+        info: 'bg-sky-100 text-sky-700',
+        warning: 'bg-amber-100 text-amber-700',
+        error: 'bg-red-100 text-red-700'
+    };
+    tbody.innerHTML = logKejadian.map(l => `
+        <tr class="hover:bg-slate-50">
+            <td class="px-6 py-3 font-mono text-slate-500">${esc(l.waktu)}</td>
+            <td class="px-6 py-3">
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${badge[l.level]}">${esc(l.level)}</span>
+            </td>
+            <td class="px-6 py-3 text-slate-700">${esc(l.pesan)}</td>
+        </tr>`).join('');
+}
+
+// ==========================================================
+// 6. SIMULASI DATA
+// Pada monitoring sungguhan, bagian ini diganti dengan data asli
+// (misalnya ping, SNMP, atau API dari router dan server).
+// ==========================================================
+function simulasiPerubahan() {
+    // Perangkat
+    perangkat.forEach(p => {
+        if (p.status === 'Terhubung') {
+            p.cpu = Math.max(1, Math.min(100, p.cpu + rnd(-8, 8)));
+            p.unduh = Math.max(0.1, +(p.unduh + (Math.random() * 6 - 3)).toFixed(1));
+            p.unggah = Math.max(0.1, +(p.unggah + (Math.random() * 3 - 1.5)).toFixed(1));
+        } else {
+            p.cpu = 0;
+            p.unduh = 0;
+            p.unggah = 0;
+        }
+
+        // Catat saat CPU perangkat melewati ambang (hanya saat baru melewati)
+        const melewati = p.status === 'Terhubung' && p.cpu > pengaturan.ambangCpu;
+        if (melewati && !p.waspada && pengaturan.peringatanAktif) {
+            tambahLog('warning', `${p.nama}: beban CPU ${p.cpu}% melewati ambang ${pengaturan.ambangCpu}%`);
+        }
+        p.waspada = melewati;
+    });
+
+    // Server
+    servers.forEach(s => {
+        if (s.status === 'Online') {
+            s.cpu = Math.max(1, Math.min(100, s.cpu + rnd(-7, 7)));
+            s.ram = Math.max(10, Math.min(100, s.ram + rnd(-4, 4)));
+            s.disk = Math.min(100, s.disk + (Math.random() < 0.1 ? 1 : 0));
+            s.uptimeDetik += pengaturan.intervalDetik;
+        }
+
+        const melewati = s.status === 'Online' &&
+            (s.cpu > pengaturan.ambangCpu || s.ram > pengaturan.ambangRam || s.disk > 90);
+        if (melewati && !s.waspada && pengaturan.peringatanAktif) {
+            tambahLog('warning', `${s.nama}: CPU ${s.cpu}%, RAM ${s.ram}%, Disk ${s.disk}% (mendekati batas)`);
+        }
+        s.waspada = melewati;
+    });
+
+    // Interface
+    interfaces.forEach(i => {
+        i.unduh = Math.max(1, Math.min(i.kapasitas, i.unduh + rnd(-5, 5)));
+        i.unggah = Math.max(1, Math.min(i.kapasitas, i.unggah + rnd(-3, 3)));
+    });
+
+    // Protokol (sedikit berubah lalu dinormalisasi ke 100%)
+    protokol.forEach(x => x.persen = Math.max(1, x.persen + rnd(-2, 2)));
+    const total = protokol.reduce((jumlah, x) => jumlah + x.persen, 0);
+    protokol.forEach(x => x.persen = Math.round(x.persen / total * 100));
+
+    // Riwayat
+    const totalUnduh = interfaces.reduce((j, i) => j + i.unduh, 0);
+    const totalUnggah = interfaces.reduce((j, i) => j + i.unggah, 0);
+    labelTrafik.push(waktuSekarang());
+    dataUnduh.push(totalUnduh);
+    dataUnggah.push(totalUnggah);
+    if (labelTrafik.length > MAX_TITIK) {
+        labelTrafik.shift(); dataUnduh.shift(); dataUnggah.shift();
+    }
+}
+
+// ==========================================================
+// 7. GRAFIK (Chart.js)
+// ==========================================================
+function initGrafik() {
+    cpuChart = new Chart(document.getElementById('cpuChart'), {
+        type: 'line',
+        data: {
+            labels: labelCpu,
+            datasets: [{
+                label: 'Rata-rata CPU (%)', data: dataCpu,
+                borderColor: '#0284c7', backgroundColor: 'rgba(56,189,248,0.15)',
+                fill: true, tension: 0.35, pointRadius: 2
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            scales: { y: { min: 0, max: 100 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    statusChart = new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Terhubung', 'Putus'],
+            datasets: [{ data: [0, 0], backgroundColor: ['#16a34a', '#ef4444'], borderWidth: 0 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '70%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    trafikChart = new Chart(document.getElementById('trafikChart'), {
+        type: 'line',
+        data: {
+            labels: labelTrafik,
+            datasets: [
+                { label: 'Unduh (Mbps)', data: dataUnduh, borderColor: '#0284c7', backgroundColor: 'rgba(56,189,248,0.15)', fill: true, tension: 0.35, pointRadius: 2 },
+                { label: 'Unggah (Mbps)', data: dataUnggah, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.10)', fill: true, tension: 0.35, pointRadius: 2 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            scales: { y: { min: 0 } },
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    protokolChart = new Chart(document.getElementById('protokolChart'), {
+        type: 'doughnut',
+        data: {
+            labels: protokol.map(x => x.nama),
+            datasets: [{
+                data: protokol.map(x => x.persen),
+                backgroundColor: ['#0ea5e9', '#22c55e', '#f59e0b', '#94a3b8'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '60%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+}
+
+// ==========================================================
+// 8. RENDER HALAMAN DASHBOARD
+// ==========================================================
+function perbaruiDashboard() {
+    const terhubung = perangkat.filter(p => p.status === 'Terhubung');
+    const putus = perangkat.filter(p => p.status === 'Putus');
+    const avgCpu = terhubung.length
+        ? Math.round(terhubung.reduce((j, p) => j + p.cpu, 0) / terhubung.length * 10) / 10
+        : 0;
+
+    document.getElementById('avgCpu').textContent = avgCpu + '%';
+    document.getElementById('cpuBar').style.width = avgCpu + '%';
+    document.getElementById('activeUsers').textContent = rnd(120, 160);
+    document.getElementById('downCount').textContent = putus.length;
+
+    // Grafik CPU
+    labelCpu.push(waktuSekarang());
+    dataCpu.push(avgCpu);
+    if (labelCpu.length > MAX_TITIK) { labelCpu.shift(); dataCpu.shift(); }
+    cpuChart.update();
+
+    // Grafik status
+    statusChart.data.datasets[0].data = [terhubung.length, putus.length];
+    statusChart.update();
+
+    // Tabel perangkat
+    document.getElementById('deviceTable').innerHTML = perangkat.length === 0
+        ? `<tr><td colspan="5" class="px-6 py-6 text-center text-slate-400">Belum ada perangkat.</td></tr>`
+        : perangkat.map(p => {
+            const badge = p.status === 'Terhubung' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+            return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-mono">${esc(p.ip)}</td>
+                    <td class="px-6 py-4 font-medium text-slate-800">${esc(p.nama)}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badge}">${esc(p.status)}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                <div class="h-2 ${warnaBar(p.cpu)} rounded-full transition-all duration-500" style="width:${p.cpu}%"></div>
+                            </div>
+                            <span class="w-10 text-slate-600">${p.cpu}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <button onclick="bukaModal(${p.id})"
+                                class="px-3 py-1.5 rounded-md bg-sky-600 text-white text-xs font-medium hover:bg-sky-700 transition">
+                            Cek
+                        </button>
+                    </td>
+                </tr>`;
+        }).join('');
+}
+
+// ==========================================================
+// 9. RENDER HALAMAN STATUS SERVER
+// ==========================================================
+function renderServer() {
+    const online = servers.filter(s => s.status === 'Online').length;
+    document.getElementById('srvOnline').textContent = online;
+    document.getElementById('srvOffline').textContent = servers.length - online;
+    document.getElementById('srvPeringatan').textContent =
+        servers.filter(s => s.waspada).length;
+
+    document.getElementById('daftarServer').innerHTML = servers.map(s => {
+        const aktif = s.status === 'Online';
+        const badge = aktif ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+        const layanan = s.layanan.map(l => `
+            <li class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+                <span class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full ${l.aktif && aktif ? 'bg-green-500' : 'bg-slate-300'}"></span>
+                    ${esc(l.nama)}
+                </span>
+                <span class="font-mono text-xs text-slate-500">Port ${l.port} &middot;
+                    <span class="${l.aktif && aktif ? 'text-green-600' : 'text-red-600'} font-semibold">
+                        ${l.aktif && aktif ? 'Berjalan' : 'Berhenti'}
+                    </span>
+                </span>
+            </li>`).join('');
+
+        return `
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h3 class="font-semibold text-slate-800 text-lg">${esc(s.nama)}</h3>
+                        <p class="text-sm text-slate-500 font-mono">${esc(s.ip)} &middot; ${esc(s.os)}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badge}">${esc(s.status)}</span>
+                </div>
+
+                <p class="text-sm text-slate-500 mb-4">
+                    <i class="fa-solid fa-clock mr-1"></i>Uptime: ${aktif ? formatUptime(s.uptimeDetik) : '-'}
+                </p>
+
+                ${aktif ? `
+                <div class="space-y-3 mb-5">
+                    ${barMetrik('CPU', s.cpu, pengaturan.ambangCpu)}
+                    ${barMetrik('RAM', s.ram, pengaturan.ambangRam)}
+                    ${barMetrik('Disk', s.disk, 90)}
+                </div>` : `
+                <div class="mb-5 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
+                    <i class="fa-solid fa-circle-xmark mr-1"></i>Server tidak merespons. Periksa daya dan koneksi jaringan.
+                </div>`}
+
+                <h4 class="text-sm font-semibold text-slate-700 mb-1">Layanan</h4>
+                <ul class="text-sm">${layanan}</ul>
+            </div>`;
+    }).join('');
+
+    renderLog();
+}
+
+// Membuat satu baris metrik dengan bar dan label
+function barMetrik(label, nilai, ambang) {
+    const peringatan = nilai > ambang;
+    return `
+        <div>
+            <div class="flex justify-between text-sm mb-1">
+                <span class="text-slate-600">${label}</span>
+                <span class="font-semibold ${peringatan ? 'text-red-600' : 'text-slate-700'}">
+                    ${nilai}%${peringatan ? ' <i class="fa-solid fa-triangle-exclamation"></i>' : ''}
+                </span>
+            </div>
+            <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-2 ${warnaBar(nilai)} rounded-full transition-all duration-500" style="width:${nilai}%"></div>
+            </div>
+        </div>`;
+}
+
+// ==========================================================
+// 10. RENDER HALAMAN LALU LINTAS DATA
+// ==========================================================
+function renderTrafik() {
+    const totalUnduh = interfaces.reduce((j, i) => j + i.unduh, 0);
+    const totalUnggah = interfaces.reduce((j, i) => j + i.unggah, 0);
+    document.getElementById('trafikDown').textContent = totalUnduh + ' Mbps';
+    document.getElementById('trafikUp').textContent = totalUnggah + ' Mbps';
+
+    // Kartu interface
+    document.getElementById('daftarInterface').innerHTML = interfaces.map(i => {
+        const persenUnduh = Math.round(i.unduh / i.kapasitas * 100);
+        const persenUnggah = Math.round(i.unggah / i.kapasitas * 100);
+        return `
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <p class="font-semibold text-slate-800">${esc(i.label)}</p>
+                        <p class="text-xs text-slate-400 font-mono">${esc(i.nama)} &middot; ${esc(i.tipe)} &middot; ${i.kapasitas} Mbps</p>
+                    </div>
+                    <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <div class="flex justify-between mb-1"><span class="text-slate-600">Unduh</span><span class="font-semibold">${i.unduh} Mbps</span></div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-2 bg-sky-500 rounded-full transition-all duration-500" style="width:${persenUnduh}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1"><span class="text-slate-600">Unggah</span><span class="font-semibold">${i.unggah} Mbps</span></div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-2 bg-indigo-500 rounded-full transition-all duration-500" style="width:${persenUnggah}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+
+    // Tabel perangkat dengan pemakaian tertinggi (hanya yang terhubung)
+    const teratas = perangkat
+        .filter(p => p.status === 'Terhubung')
+        .sort((a, b) => (b.unduh + b.unggah) - (a.unduh + a.unggah))
+        .slice(0, 5);
+
+    document.getElementById('topTable').innerHTML = teratas.length === 0
+        ? `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-400">Tidak ada perangkat yang terhubung.</td></tr>`
+        : teratas.map((p, i) => `
+            <tr class="hover:bg-slate-50">
+                <td class="px-6 py-3 text-slate-400">${i + 1}</td>
+                <td class="px-6 py-3 font-medium text-slate-800">${esc(p.nama)}</td>
+                <td class="px-6 py-3 font-mono">${esc(p.ip)}</td>
+                <td class="px-6 py-3 text-sky-600 font-semibold">${p.unduh} Mbps</td>
+                <td class="px-6 py-3 text-indigo-600 font-semibold">${p.unggah} Mbps</td>
+                <td class="px-6 py-3 font-semibold">${(p.unduh + p.unggah).toFixed(1)} Mbps</td>
+            </tr>`).join('');
+}
+
+// Memperbarui grafik lalu lintas dan protokol (dipanggil setiap siklus)
+function perbaruiGrafikTrafik() {
+    trafikChart.update();
+    protokolChart.data.datasets[0].data = protokol.map(x => x.persen);
+    protokolChart.update();
+}
+
+// ==========================================================
+// 11. MODAL DETAIL PERANGKAT
+// ==========================================================
+function bukaModal(id) {
+    const p = perangkat.find(x => x.id === id);
+    if (!p) return;
+    const terhubung = p.status === 'Terhubung';
+
+    document.getElementById('modalBody').innerHTML = `
+        <div class="flex justify-between border-b border-slate-100 pb-2">
+            <span class="text-slate-500">Nama Perangkat</span>
+            <span class="font-semibold text-slate-800">${esc(p.nama)}</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-100 pb-2">
+            <span class="text-slate-500">IP Address</span>
+            <span class="font-mono">${esc(p.ip)}</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-100 pb-2">
+            <span class="text-slate-500">Status</span>
+            <span class="font-semibold ${terhubung ? 'text-green-600' : 'text-red-600'}">${esc(p.status)}</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-100 pb-2">
+            <span class="text-slate-500">Beban CPU</span>
+            <span class="font-semibold">${p.cpu}%</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-100 pb-2">
+            <span class="text-slate-500">Bandwidth</span>
+            <span class="font-semibold">${p.unduh} / ${p.unggah} Mbps (unduh / unggah)</span>
+        </div>
+        <p class="text-xs text-slate-400 pt-1">
+            ${terhubung
+                ? 'Perangkat berjalan normal.'
+                : 'Perangkat tidak merespons. Periksa kabel jaringan dan daya perangkat.'}
+        </p>`;
+
+    document.getElementById('modal').classList.remove('hidden');
+}
+
+function tutupModal() {
+    document.getElementById('modal').classList.add('hidden');
+}
+
+document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') tutupModal();
+});
+
+// ==========================================================
+// 12. NAVIGASI ANTAR HALAMAN
+// ==========================================================
+const JUDUL_VIEW = {
+    dashboard: 'Ringkasan Sistem',
+    server: 'Status Server',
+    trafik: 'Lalu Lintas Data',
+    pengaturan: 'Pengaturan'
+};
+
+function tampilkanView(nama) {
+    viewAktif = nama;
+
+    // Tampilkan halaman yang dipilih, sembunyikan yang lain
+    Object.keys(JUDUL_VIEW).forEach(v => {
+        document.getElementById('view-' + v).classList.toggle('hidden', v !== nama);
+    });
+
+    // Atur gaya menu aktif
+    document.querySelectorAll('.menu-link').forEach(a => {
+        const aktif = a.dataset.nav === nama;
+        a.classList.toggle('bg-slate-800', aktif);
+        a.classList.toggle('text-accent', aktif);
+        a.classList.toggle('border-l-4', aktif);
+        a.classList.toggle('border-accent', aktif);
+        a.classList.toggle('font-medium', aktif);
+        a.classList.toggle('text-slate-300', !aktif);
+    });
+
+    document.getElementById('judul').textContent = JUDUL_VIEW[nama];
+
+    // Tutup sidebar di layar kecil setelah memilih menu
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+
+    // Render isi halaman yang baru dibuka
+    if (nama === 'dashboard') perbaruiDashboard();
+    if (nama === 'server') renderServer();
+    if (nama === 'trafik') renderTrafik();
+    if (nama === 'pengaturan') isiFormPengaturan();
+}
+
+// ==========================================================
+// 13. LOOP REAL-TIME
+// ==========================================================
+function siklusUpdate() {
+    simulasiPerubahan();
+
+    // Halaman yang sedang terbuka saja yang di-render ulang
+    if (viewAktif === 'dashboard') perbaruiDashboard();
+    if (viewAktif === 'server') renderServer();
+    if (viewAktif === 'trafik') renderTrafik();
+
+    perbaruiGrafikTrafik();
+}
+
+function jalankanTimer() {
+    clearInterval(timerUpdate);
+    timerUpdate = setInterval(siklusUpdate, pengaturan.intervalDetik * 1000);
+}
+
+// ==========================================================
+// 14. START
+// ==========================================================
+window.addEventListener('DOMContentLoaded', () => {
+    muatPengaturan();
+    initGrafik();
+    perbaruiJam();
+    setInterval(perbaruiJam, 1000);
+
+    simulasiPerubahan();
+    perbaruiDashboard();
+    jalankanTimer();
+});
+</script>
+</body>
+</html>
